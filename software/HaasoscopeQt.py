@@ -3,42 +3,17 @@
 pyqtgraph widget with UI template created with Qt Designer
 """
 
-import numpy as np
 import sys, time
-from serial import SerialException
-import pyqtgraph as pg
-from pyqtgraph.Qt import QtCore, QtWidgets, QtGui, loadUiType
 import h5py
+import numpy as np
+import pyqtgraph as pg
+from serial import SerialException
+from pyqtgraph.Qt import QtCore, QtWidgets, QtGui, loadUiType
+import FFTWindow
+import PersistWindow
 
-# Define fft window class from template
-FFTWindowTemplate, FFTTemplateBaseClass = loadUiType("HaasoscopeFFT.ui")
-class FFTWindow(FFTTemplateBaseClass):
-    def __init__(self):
-        FFTTemplateBaseClass.__init__(self)
-        self.ui = FFTWindowTemplate()
-        self.ui.setupUi(self)
-        self.ui.plot.setLabel('bottom', 'Freq (MHz)')
-        self.ui.plot.setLabel('left', '|Y(freq)|')
-        self.ui.plot.showGrid(x=True, y=True, alpha=1.0)
-        self.ui.plot.setRange(xRange=(0.0, 65.0))
-        self.ui.plot.setBackground('w')
-        c = (10, 10, 10)
-        self.fftpen = pg.mkPen(color=c)  # add linewidth=0.5, alpha=.5
-        self.fftline = self.ui.plot.plot(pen=self.fftpen, name="fft_plot")
-        self.fftlastTime = time.time() - 10
-        self.fftyrange = 1
 
-# Define persist window class from template
-PersistWindowTemplate, PersistTemplateBaseClass = loadUiType("HaasoscopePersist.ui")
-class PersistWindow(PersistTemplateBaseClass):
-    def __init__(self):
-        PersistTemplateBaseClass.__init__(self)
-        self.ui = PersistWindowTemplate()
-        self.ui.setupUi(self)
-        self.ui.plot.setLabel('bottom', 'Time')
-        self.ui.plot.setLabel('left', 'Volts')
-        self.ui.plot.showGrid(x=True, y=True, alpha=1.0)
-        self.ui.plot.setBackground('w')
+
 
 # Define main window class from template
 WindowTemplate, TemplateBaseClass = loadUiType("Haasoscope.ui")
@@ -113,81 +88,81 @@ class MainWindow(TemplateBaseClass):
         self.show()
 
     def selectchannel(self):
-        d.selectedchannel=self.ui.chanBox.value()
-        self.ui.dacBox.setValue(d.chanlevel[d.selectedchannel].astype(int))
+        scope.selectedchannel=self.ui.chanBox.value()
+        self.ui.dacBox.setValue(scope.chanlevel[scope.selectedchannel].astype(int))
         
-        if d.chanforscreen == d.selectedchannel:   self.ui.minidisplayCheck.setCheckState(QtCore.Qt.Checked)
+        if scope.chanforscreen == scope.selectedchannel:   self.ui.minidisplayCheck.setCheckState(QtCore.Qt.Checked)
         else:   self.ui.minidisplayCheck.setCheckState(QtCore.Qt.Unchecked)
-        if d.acdc[d.selectedchannel]:   self.ui.acdcCheck.setCheckState(QtCore.Qt.Unchecked)
+        if scope.acdc[scope.selectedchannel]:   self.ui.acdcCheck.setCheckState(QtCore.Qt.Unchecked)
         else:   self.ui.acdcCheck.setCheckState(QtCore.Qt.Checked)
-        if d.gain[d.selectedchannel]:   self.ui.gainCheck.setCheckState(QtCore.Qt.Unchecked)
+        if scope.gain[scope.selectedchannel]:   self.ui.gainCheck.setCheckState(QtCore.Qt.Unchecked)
         else:   self.ui.gainCheck.setCheckState(QtCore.Qt.Checked)
-        if d.supergain[d.selectedchannel]:   self.ui.supergainCheck.setCheckState(QtCore.Qt.Unchecked)
+        if scope.supergain[scope.selectedchannel]:   self.ui.supergainCheck.setCheckState(QtCore.Qt.Unchecked)
         else:   self.ui.supergainCheck.setCheckState(QtCore.Qt.Checked)
-        if d.havereadswitchdata: self.ui.supergainCheck.setEnabled(False)
+        if scope.havereadswitchdata: self.ui.supergainCheck.setEnabled(False)
         
-        chanonboard = d.selectedchannel%HaasoscopeLibQt.num_chan_per_board
-        theboard = HaasoscopeLibQt.num_board-1-int(d.selectedchannel/HaasoscopeLibQt.num_chan_per_board)
+        chanonboard = scope.selectedchannel%HaasoscopeLibQt.num_chan_per_board
+        theboard = HaasoscopeLibQt.num_board-1-int(scope.selectedchannel/HaasoscopeLibQt.num_chan_per_board)
         if trigboardport!="" and trigboardport!="auto" and trigboard.extclock:
             if trigboard.histostosend != theboard: trigboard.set_histostosend(theboard)
 
-        if d.havereadswitchdata:
-            if d.testBit(d.switchpos[theboard],chanonboard):   self.ui.ohmCheck.setCheckState(QtCore.Qt.Unchecked)
+        if scope.havereadswitchdata:
+            if scope.testBit(scope.switchpos[theboard],chanonboard):   self.ui.ohmCheck.setCheckState(QtCore.Qt.Unchecked)
             else:   self.ui.ohmCheck.setCheckState(QtCore.Qt.Checked)
             
-        if d.dousb:   self.ui.usb2Check.setCheckState(QtCore.Qt.Checked)
+        if scope.dousb:   self.ui.usb2Check.setCheckState(QtCore.Qt.Checked)
         else:   self.ui.usb2Check.setCheckState(QtCore.Qt.Unchecked)
         
         if len(self.lines)>0:
-            if self.lines[d.selectedchannel].isVisible():   self.ui.chanonCheck.setCheckState(QtCore.Qt.Checked)
+            if self.lines[scope.selectedchannel].isVisible():   self.ui.chanonCheck.setCheckState(QtCore.Qt.Checked)
             else:   self.ui.chanonCheck.setCheckState(QtCore.Qt.Unchecked)
-        if d.trigsactive[d.selectedchannel]:   self.ui.trigchanonCheck.setCheckState(QtCore.Qt.Checked)
+        if scope.trigsactive[scope.selectedchannel]:   self.ui.trigchanonCheck.setCheckState(QtCore.Qt.Checked)
         else:   self.ui.trigchanonCheck.setCheckState(QtCore.Qt.Unchecked)
         
-        if d.dooversample[d.selectedchannel]>0:   self.ui.oversampCheck.setCheckState(QtCore.Qt.Checked)
+        if scope.dooversample[scope.selectedchannel]>0:   self.ui.oversampCheck.setCheckState(QtCore.Qt.Checked)
         else:   self.ui.oversampCheck.setCheckState(QtCore.Qt.Unchecked)
-        if d.selectedchannel%HaasoscopeLibQt.num_chan_per_board>1:   self.ui.oversampCheck.setEnabled(False)
+        if scope.selectedchannel%HaasoscopeLibQt.num_chan_per_board>1:   self.ui.oversampCheck.setEnabled(False)
         else:  self.ui.oversampCheck.setEnabled(True)
         
-        if d.dooversample[d.selectedchannel]>=9:   self.ui.overoversampCheck.setCheckState(QtCore.Qt.Checked)
+        if scope.dooversample[scope.selectedchannel]>=9:   self.ui.overoversampCheck.setCheckState(QtCore.Qt.Checked)
         else:   self.ui.overoversampCheck.setCheckState(QtCore.Qt.Unchecked)
-        if d.selectedchannel%HaasoscopeLibQt.num_chan_per_board>0:  self.ui.overoversampCheck.setEnabled(False)
+        if scope.selectedchannel%HaasoscopeLibQt.num_chan_per_board>0:  self.ui.overoversampCheck.setEnabled(False)
         else:   self.ui.overoversampCheck.setEnabled(True)
     
     def oversamp(self):
-        if d.oversamp(d.selectedchannel)>=0:
+        if scope.oversamp(scope.selectedchannel)>=0:
             self.prepareforsamplechange()
             self.timechanged()
-            if d.dooversample[d.selectedchannel] > 0:
+            if scope.dooversample[scope.selectedchannel] > 0:
                 #turn off chan+2
-                self.lines[d.selectedchannel+2].setVisible(False)
-                if d.trigsactive[d.selectedchannel+2]: d.toggletriggerchan(d.selectedchannel+2)
+                self.lines[scope.selectedchannel+2].setVisible(False)
+                if scope.trigsactive[scope.selectedchannel+2]: scope.toggletriggerchan(scope.selectedchannel+2)
             else:
                 # turn on chan+2
-                self.lines[d.selectedchannel + 2].setVisible(True)
-                if not d.trigsactive[d.selectedchannel + 2]: d.toggletriggerchan(d.selectedchannel + 2)
+                self.lines[scope.selectedchannel + 2].setVisible(True)
+                if not scope.trigsactive[scope.selectedchannel + 2]: scope.toggletriggerchan(scope.selectedchannel + 2)
     
     def overoversamp(self):
-        if d.overoversamp()>=0:
+        if scope.overoversamp()>=0:
             self.prepareforsamplechange()
             self.timechanged()
             #turn off chan+1
-            self.lines[d.selectedchannel+1].setVisible(False)
-            if d.trigsactive[d.selectedchannel+1]: d.toggletriggerchan(d.selectedchannel+2)
+            self.lines[scope.selectedchannel+1].setVisible(False)
+            if scope.trigsactive[scope.selectedchannel+1]: scope.toggletriggerchan(scope.selectedchannel+2)
     
     def chanon(self):
         if self.ui.chanonCheck.checkState() == QtCore.Qt.Checked:
-            self.lines[d.selectedchannel].setVisible(True)
+            self.lines[scope.selectedchannel].setVisible(True)
             self.ui.trigchanonCheck.setCheckState(QtCore.Qt.Checked)
         else:
-            self.lines[d.selectedchannel].setVisible(False)
+            self.lines[scope.selectedchannel].setVisible(False)
             self.ui.trigchanonCheck.setCheckState(QtCore.Qt.Unchecked)
         
     def trigchanon(self):
         if self.ui.trigchanonCheck.checkState() == QtCore.Qt.Checked:
-            if not d.trigsactive[d.selectedchannel]: d.toggletriggerchan(d.selectedchannel)
+            if not scope.trigsactive[scope.selectedchannel]: scope.toggletriggerchan(scope.selectedchannel)
         else:
-            if d.trigsactive[d.selectedchannel]: d.toggletriggerchan(d.selectedchannel)
+            if scope.trigsactive[scope.selectedchannel]: scope.toggletriggerchan(scope.selectedchannel)
     
     def slowchanon(self):
         maxchan=self.ui.slowchanBox.value()+HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.num_board
@@ -198,32 +173,32 @@ class MainWindow(TemplateBaseClass):
     
     def acdc(self):
         if self.ui.acdcCheck.checkState() == QtCore.Qt.Checked: #ac coupled
-            if d.acdc[d.selectedchannel]:
-                d.setacdc()
+            if scope.acdc[scope.selectedchannel]:
+                scope.setacdc()
         if self.ui.acdcCheck.checkState() == QtCore.Qt.Unchecked: #dc coupled
-            if not d.acdc[d.selectedchannel]:
-                d.setacdc()
+            if not scope.acdc[scope.selectedchannel]:
+                scope.setacdc()
     
     def gain(self):
         if self.ui.gainCheck.checkState() == QtCore.Qt.Checked: #x10
-            if d.gain[d.selectedchannel]:
-                d.tellswitchgain(d.selectedchannel)
+            if scope.gain[scope.selectedchannel]:
+                scope.tellswitchgain(scope.selectedchannel)
         if self.ui.gainCheck.checkState() == QtCore.Qt.Unchecked: #x1
-            if not d.gain[d.selectedchannel]:
-                d.tellswitchgain(d.selectedchannel)
+            if not scope.gain[scope.selectedchannel]:
+                scope.tellswitchgain(scope.selectedchannel)
  
     def supergain(self):
         if self.ui.supergainCheck.checkState() == QtCore.Qt.Checked: #x100
-            if d.supergain[d.selectedchannel]:
-                d.togglesupergainchan(d.selectedchannel)
+            if scope.supergain[scope.selectedchannel]:
+                scope.togglesupergainchan(scope.selectedchannel)
         if self.ui.supergainCheck.checkState() == QtCore.Qt.Unchecked: #x1
-            if not d.supergain[d.selectedchannel]:
-                d.togglesupergainchan(d.selectedchannel)
+            if not scope.supergain[scope.selectedchannel]:
+                scope.togglesupergainchan(scope.selectedchannel)
                    
     def minidisplay(self):
         if self.ui.minidisplayCheck.checkState()==QtCore.Qt.Checked:
-            if d.chanforscreen != d.selectedchannel:
-                d.tellminidisplaychan(d.selectedchannel)
+            if scope.chanforscreen != scope.selectedchannel:
+                scope.tellminidisplaychan(scope.selectedchannel)
 
     def posamount(self):
         amount=10
@@ -234,16 +209,16 @@ class MainWindow(TemplateBaseClass):
             amount/=10
         return amount
     def uppos(self):
-        d.adjustvertical(True,self.posamount())
-        self.ui.dacBox.setValue(d.chanlevel[d.selectedchannel].astype(int))
+        scope.adjustvertical(True,self.posamount())
+        self.ui.dacBox.setValue(scope.chanlevel[scope.selectedchannel].astype(int))
     def downpos(self):
-        d.adjustvertical(False,self.posamount())
-        self.ui.dacBox.setValue(d.chanlevel[d.selectedchannel].astype(int))
+        scope.adjustvertical(False,self.posamount())
+        self.ui.dacBox.setValue(scope.chanlevel[scope.selectedchannel].astype(int))
     def setlevel(self):
-        if d.chanlevel[d.selectedchannel] != self.ui.dacBox.value():
-            d.chanlevel[d.selectedchannel] = self.ui.dacBox.value()
-            d.rememberdacvalue()
-            d.setdacvalue()
+        if scope.chanlevel[scope.selectedchannel] != self.ui.dacBox.value():
+            scope.chanlevel[scope.selectedchannel] = self.ui.dacBox.value()
+            scope.rememberdacvalue()
+            scope.setdacvalue()
     
     def wheelEvent(self, event): #QWheelEvent
         if hasattr(event,"delta"):
@@ -261,74 +236,74 @@ class MainWindow(TemplateBaseClass):
         modifiers = QtWidgets.QApplication.keyboardModifiers()
         if event.key()==QtCore.Qt.Key_I:
             if not modifiers == QtCore.Qt.ShiftModifier:
-                theboard = HaasoscopeLibQt.num_board - 1 - int(d.selectedchannel / HaasoscopeLibQt.num_chan_per_board)
-                d.increment_clk_phase(theboard)
+                theboard = HaasoscopeLibQt.num_board - 1 - int(scope.selectedchannel / HaasoscopeLibQt.num_chan_per_board)
+                scope.increment_clk_phase(theboard)
             else:
                 if trigboardport!="": trigboard.increment_trig_board_clock_phase()
         if event.key()==QtCore.Qt.Key_1: trigboard.set_prescale(0.1)
         if event.key()==QtCore.Qt.Key_2: trigboard.set_prescale(0.2)
-        if event.key()==QtCore.Qt.Key_C: d.toggle_checkfastusbwriting()
+        if event.key()==QtCore.Qt.Key_C: scope.toggle_checkfastusbwriting()
 
     def actionRead_from_file(self):
-        d.readcalib()
+        scope.readcalib()
         
     def actionStore_to_file(self):
-        d.storecalib()
+        scope.storecalib()
 
     def actionDo_autocalibration(self):
         print("starting autocalibration")
-        d.autocalibchannel=0
+        scope.autocalibchannel=0
 
     def actionOutput_clk_left(self):
-        d.toggle_clk_last()
+        scope.toggle_clk_last()
         if trigboardport!="": trigboard.setclock(True)
 
     def actionAllow_same_chan_coin(self):
-        d.toggle_allow_same_chan_coin()
+        scope.toggle_allow_same_chan_coin()
 
     def exttrig(self):
-        d.toggleuseexttrig()
+        scope.toggleuseexttrig()
          
     def tot(self):
-        d.triggertimethresh = self.ui.totBox.value()
-        d.settriggertime(d.triggertimethresh)
+        scope.triggertimethresh = self.ui.totBox.value()
+        scope.settriggertime(scope.triggertimethresh)
 
     def coin(self):
-        d.settrigcoin(self.ui.coinBox.value())
+        scope.settrigcoin(self.ui.coinBox.value())
     def cointime(self):
-        d.settrigcointime(self.ui.cointimeBox.value())
+        scope.settrigcointime(self.ui.cointimeBox.value())
         
     def autorearm(self):
-        d.toggleautorearm()
+        scope.toggleautorearm()
 
     def noselftrig(self):
-        d.donoselftrig()
+        scope.donoselftrig()
 
     def avg(self):
-        d.average = not d.average
-        print("average",d.average)
+        scope.average = not scope.average
+        print("average",scope.average)
         
     def logic(self):
-        d.togglelogicanalyzer()
-        if d.dologicanalyzer:
-            for li in np.arange(d.num_logic_inputs):
+        scope.togglelogicanalyzer()
+        if scope.dologicanalyzer:
+            for li in np.arange(scope.num_logic_inputs):
                 c=(0,0,0)
                 pen = pg.mkPen(color=c) # add linewidth=1.7, alpha=.65
-                self.lines[d.logicline1+li].setPen(pen)
+                self.lines[scope.logicline1+li].setPen(pen)
         else:
-            for li in np.arange(d.num_logic_inputs):
-                self.lines[d.logicline1+li].setPen(None)
+            for li in np.arange(scope.num_logic_inputs):
+                self.lines[scope.logicline1+li].setPen(None)
         
     def highres(self):
-        d.togglehighres()
+        scope.togglehighres()
         
     def usb2(self):
         if self.ui.usb2Check.checkState() == QtCore.Qt.Checked:
-            if not d.dousb:
-                d.toggledousb()
+            if not scope.dousb:
+                scope.toggledousb()
         else:
-            if d.dousb:
-                d.toggledousb()
+            if scope.dousb:
+                scope.toggledousb()
         
     def grid(self):
         if self.ui.gridCheck.isChecked():
@@ -349,38 +324,38 @@ class MainWindow(TemplateBaseClass):
                 self.lines[li].setSymbol(None)
                 
     def resamp(self):
-        d.sincresample = self.ui.resampBox.value()
-        if d.sincresample>0: d.xydata=np.empty([HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.num_board,2,d.sincresample*(d.num_samples-1)],dtype=float)
-        else: d.xydata=np.empty([HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.num_board,2,1*(d.num_samples-1)],dtype=float)
+        scope.sincresample = self.ui.resampBox.value()
+        if scope.sincresample>0: scope.xydata=np.empty([HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.num_board,2,scope.sincresample*(scope.num_samples-1)],dtype=float)
+        else: scope.xydata=np.empty([HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.num_board,2,1*(scope.num_samples-1)],dtype=float)
         self.prepareforsamplechange()
     
     def dostartstop(self):        
-        if d.paused:
+        if scope.paused:
             self.timer.start(0)
             self.timer2.start(1000)
-            d.paused=False
+            scope.paused=False
             self.ui.runButton.setChecked(True)            
         else:
             self.timer.stop()
             self.timer2.stop()
-            d.paused=True
+            scope.paused=True
             self.ui.runButton.setChecked(False)
     
     def prepareforsamplechange(self): #called when sampling is changed, to reset some things
-        d.recordedchannel=[]
+        scope.recordedchannel=[]
         #if d.doxyplot: plt.close(self.figxy)
         #if d.recorddata: plt.close(self.fig2d)
         
     def triggerlevelchanged(self,value):
-        d.settriggerthresh(value)
-        self.hline = (float(  value-128  )*d.yscale/256.)
-        self.otherlines[1].setData( [d.min_x, d.max_x], [self.hline, self.hline] ) # horizontal line showing trigger threshold
+        scope.settriggerthresh(value)
+        self.hline = (float(  value-128  )*scope.yscale/256.)
+        self.otherlines[1].setData( [scope.min_x, scope.max_x], [self.hline, self.hline] ) # horizontal line showing trigger threshold
 
     def triggerlevel2changed(self,value):
-        d.settriggerthresh2(value)                
-        self.hline2 =(float(  value-128  )*d.yscale/256.)
+        scope.settriggerthresh2(value)                
+        self.hline2 =(float(  value-128  )*scope.yscale/256.)
         self.otherlines[2].setVisible(True) # starts off being hidden, so now show it!
-        self.otherlines[2].setData( [d.min_x, d.max_x], [self.hline2, self.hline2] )
+        self.otherlines[2].setData( [scope.min_x, scope.max_x], [self.hline2, self.hline2] )
         
     def thresh2(self):
         if self.ui.thresh2Check.checkState() == QtCore.Qt.Checked:
@@ -394,32 +369,32 @@ class MainWindow(TemplateBaseClass):
     def triggerposchanged(self,value):
         if value>253 or value<3: return
         offset=5.0 # trig to readout delay
-        scal = d.num_samples/256.
-        point = value*scal + offset/pow(2,d.downsample)
-        if d.downsample<0: point = 128*scal + (point-128*scal)*pow(2,d.downsample)
-        d.settriggerpoint(int(point))
-        self.vline = float(  2*(value-128)/256. *d.xscale /d.xscaling)
-        self.otherlines[0].setData( [self.vline, self.vline], [d.min_y, d.max_y] ) # vertical line showing trigger time
+        scal = scope.num_samples/256.
+        point = value*scal + offset/pow(2,scope.downsample)
+        if scope.downsample<0: point = 128*scal + (point-128*scal)*pow(2,scope.downsample)
+        scope.settriggerpoint(int(point))
+        self.vline = float(  2*(value-128)/256. *scope.xscale /scope.xscaling)
+        self.otherlines[0].setData( [self.vline, self.vline], [scope.min_y, scope.max_y] ) # vertical line showing trigger time
     
     def rolling(self):
-        d.rolltrigger = not d.rolltrigger
-        d.tellrolltrig(d.rolltrigger)
+        scope.rolltrigger = not scope.rolltrigger
+        scope.tellrolltrig(scope.rolltrigger)
         if trigboardport!="":
             trigboard.togglerolling()
-        self.ui.rollingButton.setChecked(d.rolltrigger)
-        if d.rolltrigger: self.ui.rollingButton.setText("Rolling/Auto")
+        self.ui.rollingButton.setChecked(scope.rolltrigger)
+        if scope.rolltrigger: self.ui.rollingButton.setText("Rolling/Auto")
         else: self.ui.rollingButton.setText("Normal")
 
     def single(self):
-        d.getone = not d.getone
-        self.ui.singleButton.setChecked(d.getone)
+        scope.getone = not scope.getone
+        self.ui.singleButton.setChecked(scope.getone)
         
     def timefast(self):
         amount=1
         modifiers = app.keyboardModifiers()
         if modifiers == QtCore.Qt.ShiftModifier:
             amount*=5
-        d.telldownsample(d.downsample-amount)
+        scope.telldownsample(scope.downsample-amount)
         self.timechanged()
     
     def timeslow(self):
@@ -427,20 +402,20 @@ class MainWindow(TemplateBaseClass):
         modifiers = app.keyboardModifiers()
         if modifiers == QtCore.Qt.ShiftModifier:
             amount*=5
-        d.telldownsample(d.downsample+amount)
+        scope.telldownsample(scope.downsample+amount)
         self.timechanged()
     
     def timechanged(self):
-        self.ui.plot.setRange(xRange=(d.min_x, d.max_x), yRange=(d.min_y, d.max_y)) 
+        self.ui.plot.setRange(xRange=(scope.min_x, scope.max_x), yRange=(scope.min_y, scope.max_y)) 
         self.ui.plot.setMouseEnabled(x=False,y=False)
-        self.ui.plot.setLabel('bottom', d.xlabel)
-        self.ui.plot.setLabel('left', d.ylabel)
+        self.ui.plot.setLabel('bottom', scope.xlabel)
+        self.ui.plot.setLabel('left', scope.ylabel)
         self.triggerposchanged(self.ui.horizontalSlider.value())
-        self.ui.timebaseBox.setText("downsample "+str(d.downsample))
+        self.ui.timebaseBox.setText("downsample "+str(scope.downsample))
         
     def risingfalling(self):
-        d.fallingedge=not self.ui.risingedgeCheck.checkState()
-        d.settriggertype(d.fallingedge)
+        scope.fallingedge=not self.ui.risingedgeCheck.checkState()
+        scope.settriggertype(scope.fallingedge)
 
     def decode(self):
         if self.ui.decodeCheck.checkState() != QtCore.Qt.Checked:
@@ -450,35 +425,35 @@ class MainWindow(TemplateBaseClass):
 
     def fft(self):
         if self.ui.fftCheck.checkState() == QtCore.Qt.Checked:
-            d.fftchan = d.selectedchannel
+            scope.fftchan = scope.selectedchannel
             self.fftui = FFTWindow()
-            self.fftui.setWindowTitle('HaasoscopeQt FFT of channel ' + str(d.fftchan))
+            self.fftui.setWindowTitle('HaasoscopeQt FFT of channel ' + str(scope.fftchan))
             self.fftui.show()
-            d.dofft = True
+            scope.dofft = True
         else:
             self.fftui.close()
-            d.dofft = False
+            scope.dofft = False
 
     def persist(self):
         if self.ui.persistCheck.checkState() == QtCore.Qt.Checked:
             self.persistui = PersistWindow()
-            self.persistui.setWindowTitle('HaasoscopeQt persist of channel ' + str(d.selectedchannel))
+            self.persistui.setWindowTitle('HaasoscopeQt persist of channel ' + str(scope.selectedchannel))
             self.persistui.show()
-            d.recorddata=True; d.recorddatachan=d.selectedchannel; d.recordedchannel=[]
+            scope.recorddata=True; scope.recorddatachan=scope.selectedchannel; scope.recordedchannel=[]
             self.firstpersist=True
-            print("recorddata now",d.recorddata,"for channel",d.recorddatachan)
+            print("recorddata now",scope.recorddata,"for channel",scope.recorddatachan)
         else:
-            d.recorddata=False; d.recorddatachan=d.selectedchannel; d.recordedchannel=[]
-            print("recorddata now",d.recorddata)
+            scope.recorddata=False; scope.recorddatachan=scope.selectedchannel; scope.recordedchannel=[]
+            print("recorddata now",scope.recorddata)
             self.persistui.close()
 
     def drawing(self):
         if self.ui.drawingCheck.checkState() == QtCore.Qt.Checked:
-            d.dodrawing=True
-            print("drawing now",d.dodrawing)
+            scope.dodrawing=True
+            print("drawing now",scope.dodrawing)
         else:
-            d.dodrawing=False
-            print("drawing now",d.dodrawing)
+            scope.dodrawing=False
+            print("drawing now",scope.dodrawing)
 
     def record(self):
         self.savetofile = not self.savetofile
@@ -559,7 +534,7 @@ class MainWindow(TemplateBaseClass):
                     if chan==2: c="b"
                     if chan==3: c="m"
                 pen = pg.mkPen(color=c) # add linewidth=1.0, alpha=.9
-                line = self.ui.plot.plot(pen=pen,name=d.chtext+str(li))
+                line = self.ui.plot.plot(pen=pen,name=scope.chtext+str(li))
             line.curve.setClickable(True)
             line.curve.sigClicked.connect(self.fastadclineclick)
             self.lines.append(line)
@@ -568,17 +543,17 @@ class MainWindow(TemplateBaseClass):
         self.ui.slowchanBox.setMinimum(0)
         self.ui.slowchanBox.setMaximum(max(len(HaasoscopeLibQt.max10adcchans)-1,0))
         #for the logic analyzer
-        for li in np.arange(d.num_logic_inputs):
+        for li in np.arange(scope.num_logic_inputs):
             line = self.ui.plot.plot(pen=None,name="logic_"+str(li)) # not drawn by default
             self.lines.append(line)
-            if li==0: d.logicline1=len(self.lines)-1 # remember index where this first logic line is
+            if li==0: scope.logicline1=len(self.lines)-1 # remember index where this first logic line is
         #other data to draw
-        if d.fitline1>-1:
+        if scope.fitline1>-1:
             pen = pg.mkPen(color="purple") # add linewidth=0.5, alpha=.5
             line = self.ui.plot.plot(pen=pen,name="fitline1") # not drawn by default
             line.setVisible(False)
             self.lines.append(line)
-            d.fitline1=len(self.lines)-1 # remember index where this line is
+            scope.fitline1=len(self.lines)-1 # remember index where this line is
         #trigger lines
         self.vline=0.0
         pen = pg.mkPen(color="k",width=1.0,style=QtCore.Qt.DashLine)
@@ -594,10 +569,10 @@ class MainWindow(TemplateBaseClass):
         line.setVisible(False)
         self.otherlines.append(line)
         #other stuff
-        d.setxaxis()
-        d.setyaxis()
+        scope.setxaxis()
+        scope.setyaxis()
         self.timechanged()
-        self.ui.totBox.setMaximum(d.num_samples)
+        self.ui.totBox.setMaximum(scope.num_samples)
         self.ui.plot.showGrid(x=True, y=True)
     
     def closeEvent(self, event):
@@ -605,7 +580,7 @@ class MainWindow(TemplateBaseClass):
         self.timer.stop()
         self.timer2.stop()
         if trigboardport!="": trigboard.cleanup()
-        d.cleanup()
+        scope.cleanup()
         if self.savetofile: self.outf.close()
         if hasattr(self,"fftui"):
             self.fftui.close()
@@ -615,61 +590,61 @@ class MainWindow(TemplateBaseClass):
     decodelabels = []
     def updateplot(self):
         self.mainloop()
-        if d.timedout: return # don't draw old junk if there was a timeout getting data (as often the case with no rolling trigger)
+        if scope.timedout: return # don't draw old junk if there was a timeout getting data (as often the case with no rolling trigger)
         if self.savetofile: self.dosavetofile()
         if not self.ui.drawingCheck.checkState() == QtCore.Qt.Checked: return
         for li in range(self.nlines):
             maxchan=li-HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.num_board
             if maxchan>=0: # these are the slow ADC channels
-                self.lines[li].setData(d.xydataslow[maxchan][0],d.xydataslow[maxchan][1])
+                self.lines[li].setData(scope.xydataslow[maxchan][0],scope.xydataslow[maxchan][1])
             else:
-                self.lines[li].setData(d.xydata[li][0],d.xydata[li][1])
-        if d.dologicanalyzer:
-            for li in np.arange(d.num_logic_inputs):
-                self.lines[d.logicline1+li].setData(d.xydatalogic[li][0],d.xydatalogic[li][1])
-        if d.dofft:
-            self.fftui.fftline.setPen(self.linepens[d.fftchan])
-            self.fftui.fftline.setData(d.fftfreqplot_xdata,d.fftfreqplot_ydata)
-            self.fftui.ui.plot.setTitle("FFT plot of channel "+str(d.fftchan))
-            self.fftui.ui.plot.setLabel('bottom', d.fftax_xlabel)
-            self.fftui.ui.plot.setRange(xRange=(0.0, d.fftax_xlim))
+                self.lines[li].setData(scope.xydata[li][0],scope.xydata[li][1])
+        if scope.dologicanalyzer:
+            for li in np.arange(scope.num_logic_inputs):
+                self.lines[scope.logicline1+li].setData(scope.xydatalogic[li][0],scope.xydatalogic[li][1])
+        if scope.dofft:
+            self.fftui.fftline.setPen(self.linepens[scope.fftchan])
+            self.fftui.fftline.setData(scope.fftfreqplot_xdata,scope.fftfreqplot_ydata)
+            self.fftui.ui.plot.setTitle("FFT plot of channel "+str(scope.fftchan))
+            self.fftui.ui.plot.setLabel('bottom', scope.fftax_xlabel)
+            self.fftui.ui.plot.setRange(xRange=(0.0, scope.fftax_xlim))
             now = time.time()
             dt = now - self.fftui.fftlastTime
-            if dt>3.0 or self.fftyrange<d.fftfreqplot_ydatamax*1.1:
+            if dt>3.0 or self.fftyrange<scope.fftfreqplot_ydatamax*1.1:
                 self.fftui.fftlastTime = now
-                self.fftui.ui.plot.setRange(yRange=(0.0, d.fftfreqplot_ydatamax*1.1))
-                self.fftyrange = d.fftfreqplot_ydatamax * 1.1
+                self.fftui.ui.plot.setRange(yRange=(0.0, scope.fftfreqplot_ydatamax*1.1))
+                self.fftyrange = scope.fftfreqplot_ydatamax * 1.1
             if not self.fftui.isVisible(): # closed the fft window
-                d.dofft = False
+                scope.dofft = False
                 self.ui.fftCheck.setCheckState(QtCore.Qt.Unchecked)
-        if d.recorddata:
+        if scope.recorddata:
             if self.firstpersist:
-                self.image1 = pg.ImageItem(image=d.recorded2d,opacity=0.5)
+                self.image1 = pg.ImageItem(image=scope.recorded2d,opacity=0.5)
                 self.persistui.ui.plot.addItem(self.image1)
-                self.persistui.ui.plot.setTitle("Persist plot of channel "+str(d.recorddatachan))
+                self.persistui.ui.plot.setTitle("Persist plot of channel "+str(scope.recorddatachan))
                 self.cmap = pg.colormap.get('CET-D8')
                 self.firstpersist=False
             else:
-                self.image1.setImage(image=d.recorded2d,opacity=0.5)
-            self.image1.setRect(QtCore.QRectF(d.min_x,d.min_y,d.max_x-d.min_x,d.max_y-d.min_y))
-            self.persistui.ui.plot.setLabel('bottom', d.xlabel)
-            self.bar = pg.ColorBarItem(interactive=False, values= (0, np.max(d.recorded2d)), cmap=self.cmap)
+                self.image1.setImage(image=scope.recorded2d,opacity=0.5)
+            self.image1.setRect(QtCore.QRectF(scope.min_x,scope.min_y,scope.max_x-scope.min_x,scope.max_y-scope.min_y))
+            self.persistui.ui.plot.setLabel('bottom', scope.xlabel)
+            self.bar = pg.ColorBarItem(interactive=False, values= (0, np.max(scope.recorded2d)), cmap=self.cmap)
             self.bar.setImageItem(self.image1)
             if not self.persistui.isVisible(): # closed the fft window
-                d.recorddata = False
+                scope.recorddata = False
                 self.ui.persistCheck.setCheckState(QtCore.Qt.Unchecked)
         if self.ui.decodeCheck.checkState() == QtCore.Qt.Checked:
             # delete all previous labels
             for label in self.decodelabels:
                 self.ui.plot.removeItem(label)
-            if d.downsample>=0:
-                resulttext,resultstart,resultend = d.decode()
+            if scope.downsample>=0:
+                resulttext,resultstart,resultend = scope.decode()
                 #print(resulttext,resultstart, d.min_x, d.max_x, d.xscale, d.xscaling)
                 item=0
                 while item<len(resulttext):
                     label = pg.TextItem(resulttext[item])
-                    label.setColor(self.linepens[d.selectedchannel].color())
-                    x=d.min_x+resultstart[item]*1e9/d.xscaling
+                    label.setColor(self.linepens[scope.selectedchannel].color())
+                    x=scope.min_x+resultstart[item]*1e9/scope.xscaling
                     label.setPos( QtCore.QPointF(x, -1) )
                     #print(x)
                     self.ui.plot.addItem(label)
@@ -692,17 +667,17 @@ class MainWindow(TemplateBaseClass):
     def dosavetofile(self):
         time_s=str(time.time())
         if self.doh5:
-            datatosave=d.xydata[:,1,:] # save all y data by default
-            if d.xscale != self.oldxscale:
-                datatosave=d.xydata # since the x scale changed (or is the first event), save all data for this event
-                self.oldxscale=d.xscale
+            datatosave=scope.xydata[:,1,:] # save all y data by default
+            if scope.xscale != self.oldxscale:
+                datatosave=scope.xydata # since the x scale changed (or is the first event), save all data for this event
+                self.oldxscale=scope.xscale
             h5ds = self.outf.create_dataset(str(self.nevents), data=datatosave, dtype='float32', compression="lzf") #compression="gzip", compression_opts=5)
             #about 3kB per event per board (4 channels) for 512 samples
             h5ds.attrs['time']=time_s
-            h5ds.attrs['trigger_position']=str(self.vline*d.xscaling)
-            h5ds.attrs['sample_period'] =str(2.*d.xscale/d.num_samples)
-            h5ds.attrs['num_samples'] =str(d.num_samples)
-            if d.dologicanalyzer: h5ds = self.outf.create_dataset(str(self.nevents)+"_logic", data=d.xydatalogicraw, dtype='uint8', compression="lzf")
+            h5ds.attrs['trigger_position']=str(self.vline*scope.xscaling)
+            h5ds.attrs['sample_period'] =str(2.*scope.xscale/scope.num_samples)
+            h5ds.attrs['num_samples'] =str(scope.num_samples)
+            if scope.dologicanalyzer: h5ds = self.outf.create_dataset(str(self.nevents)+"_logic", data=scope.xydatalogicraw, dtype='uint8', compression="lzf")
             # see h5py_analyze_example.py for how to read in python
         else:
             for c in range(HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.num_board):
@@ -710,14 +685,14 @@ class MainWindow(TemplateBaseClass):
                     self.outf.write(str(self.nevents)+",") # start of each line is the event number
                     self.outf.write(time_s+",") # next column is the time in seconds of the current event
                     self.outf.write(str(c)+",") # next column is the channel number
-                    self.outf.write(str(self.vline*d.xscaling)+",") # next column is the trigger time
-                    self.outf.write(str(2.*d.xscale/d.num_samples)+",") # next column is the time between samples, in ns
-                    self.outf.write(str(d.num_samples)+",") # next column is the number of samples
-                    d.xydata[c][1].tofile(self.outf,",",format="%.3f") # save y data (1) from fast adc channel c
+                    self.outf.write(str(self.vline*scope.xscaling)+",") # next column is the trigger time
+                    self.outf.write(str(2.*scope.xscale/scope.num_samples)+",") # next column is the time between samples, in ns
+                    self.outf.write(str(scope.num_samples)+",") # next column is the number of samples
+                    scope.xydata[c][1].tofile(self.outf,",",format="%.3f") # save y data (1) from fast adc channel c
                     self.outf.write("\n") # newline
-            if d.dologicanalyzer:
+            if scope.dologicanalyzer:
                 for b in range(HaasoscopeLibQt.num_board):
-                    d.xydatalogicraw[b].tofile(self.outf,",")
+                    scope.xydatalogicraw[b].tofile(self.outf,",")
                     self.outf.write("\n")  # newline
         # should also write out the 8 digital bits per board (if logic analyzer on)
         # stored in d.xydatalogicraw[board]
@@ -727,9 +702,9 @@ class MainWindow(TemplateBaseClass):
     tinterval=100.
     oldtime=time.time()
     def mainloop(self):
-        if d.paused: time.sleep(.1)
+        if scope.paused: time.sleep(.1)
         else:
-            try: status=d.getchannels()
+            try: status=scope.getchannels()
             except SerialException:
                 print("Serial exception getting channels!!")
                 sys.exit(1)
@@ -737,33 +712,33 @@ class MainWindow(TemplateBaseClass):
                 print("Device error")
                 sys.exit(1)
             if status==2: self.selectchannel() #we updated the switch data
-            if d.db: print(time.time()-d.oldtime,"done with evt",self.nevents)
+            if scope.db: print(time.time()-scope.oldtime,"done with evt",self.nevents)
             self.nevents += 1
             if self.nevents-self.oldnevents >= self.tinterval:
                 now=time.time()
                 elapsedtime=now-self.oldtime
                 self.oldtime=now
                 lastrate = round(self.tinterval/elapsedtime,2)
-                if d.dologicanalyzer: nchan = HaasoscopeLibQt.num_chan_per_board + 1
+                if scope.dologicanalyzer: nchan = HaasoscopeLibQt.num_chan_per_board + 1
                 else: nchan = HaasoscopeLibQt.num_chan_per_board
-                print(self.nevents,"events,",lastrate,"Hz",round(lastrate*HaasoscopeLibQt.num_board*d.num_samples*nchan/1e6,3),"MB/s")
+                print(self.nevents,"events,",lastrate,"Hz",round(lastrate*HaasoscopeLibQt.num_board*scope.num_samples*nchan/1e6,3),"MB/s")
                 if lastrate>40: self.tinterval=500.
                 else: self.tinterval=100.
                 self.oldnevents=self.nevents
                 newrecordedchannellength=int(max(10,5*lastrate)) #the number of events to show on the persist plot
-                if newrecordedchannellength<len(d.recordedchannel):
-                    del d.recordedchannel[0:len(d.recordedchannel)-newrecordedchannellength]
-                d.recordedchannellength=newrecordedchannellength
+                if newrecordedchannellength<len(scope.recordedchannel):
+                    del scope.recordedchannel[0:len(scope.recordedchannel)-newrecordedchannellength]
+                scope.recordedchannellength=newrecordedchannellength
             if self.nevents%self.numrecordeventsperfile==0:
                 if self.savetofile: # if writing, close and open new file
                     self.record()
                     if self.doh5: self.oldxscale=0 #to force writing the time header info in h5
                     self.record()
-            if d.getone and not d.timedout: self.dostartstop()
+            if scope.getone and not scope.timedout: self.dostartstop()
 
     def drawtext(self): # happens once per second
-        d.tellrolltrig(d.rolltrigger) #because sometimes the message had been lost
-        self.ui.textBrowser.setText(d.chantext())
+        scope.tellrolltrig(scope.rolltrigger) #because sometimes the message had been lost
+        self.ui.textBrowser.setText(scope.chantext())
         self.ui.textBrowser.append("trigger threshold: " + str(round(self.hline,3)))
         if trigboardport!="" and trigboard.extclock:
             delaycounters = trigboard.get_delaycounters()
@@ -771,7 +746,7 @@ class MainWindow(TemplateBaseClass):
             self.ui.textBrowser.append(trigboard.get_histos())
             for b in range(HaasoscopeLibQt.num_board):
                 if not delaycounters[b]:
-                    d.increment_clk_phase(b,30) # increment clk of that board by 30*100ps=3ns
+                    scope.increment_clk_phase(b,30) # increment clk of that board by 30*100ps=3ns
 
 if __name__ == '__main__':
     import libs.HaasoscopeLibQt as HaasoscopeLibQt
@@ -808,7 +783,7 @@ if __name__ == '__main__':
                 HaasoscopeLibQt.num_board = int(a[2:])
                 print("num_board set to", HaasoscopeLibQt.num_board)
 
-    d = HaasoscopeLibQt.Haasoscope()
+    scope = HaasoscopeLibQt.Haasoscope()
 
     script=""
     trigboardport = ""
@@ -816,26 +791,26 @@ if __name__ == '__main__':
         if a[0] == "-":
             #print(a)
             if a[1:3] == "mt":
-                d.domt=True
-                print("domt set to",d.domt)
+                scope.domt=True
+                print("domt set to",scope.domt)
             elif a[1:8] == "fastusb":
-                d.dofastusb = True
-                d.dousbparallel = True
-                print("dofastusb", d.dofastusb, "and dousbparallel", d.dousbparallel)
+                scope.dofastusb = True
+                scope.dousbparallel = True
+                print("dofastusb", scope.dofastusb, "and dousbparallel", scope.dousbparallel)
             elif a[1:7] == "script": #eg: -scriptmysetup.py will run those commands after setup
                 script = str(a[7:])
                 print("script set to", script)
             elif a[1] == "s" and a[2]!="r":
-                d.serialdelaytimerwait = int(a[2:])
-                print("serialdelaytimerwait set to", d.serialdelaytimerwait)
+                scope.serialdelaytimerwait = int(a[2:])
+                print("serialdelaytimerwait set to", scope.serialdelaytimerwait)
             elif a[1] == "p":
-                d.serport = a[2:]
-                print("serial port manually set to", d.serport)
+                scope.serport = a[2:]
+                print("serial port manually set to", scope.serport)
             elif a[1] == "t":
                 trigboardport = a[2:]
                 print("trigboardport set to", trigboardport)            
 
-    if d.domt and not d.dofastusb:
+    if scope.domt and not scope.dofastusb:
         print("mt option is only for fastusb - exiting!")
         sys.exit()
 
@@ -852,20 +827,20 @@ if __name__ == '__main__':
         app.setFont(font);
         win = MainWindow()
         win.setWindowTitle('Haasoscope Qt')
-        if not d.setup_connections():
+        if not scope.setup_connections():
             print("Exiting now - failed setup_connections!")
             sys.exit(1)
         if trigboardport!="":
-            if trigboardport=="auto": trigboardport=d.trigserport
+            if trigboardport=="auto": trigboardport=scope.trigserport
             trigboard = HaasoscopeTrigLibQt.HaasoscopeTrig(trigboardport)
             if not trigboard.get_firmware_version():
                 print("couldn't get trigboard firmware version - exiting!")
                 sys.exit()
             trigboard.setrngseed()
             trigboard.set_prescale(1.0)
-        if not d.init():
+        if not scope.init():
             print("Exiting now - failed init!")
-            d.cleanup()
+            scope.cleanup()
             sys.exit()
         win.launch()
         win.triggerposchanged(128)  # center the trigger
