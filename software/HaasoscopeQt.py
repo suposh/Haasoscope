@@ -249,7 +249,7 @@ class MainWindow(TemplateBaseClass):
                 if trigboardport!="": trigboard.increment_trig_board_clock_phase()
         if event.key()==QtCore.Qt.Key_1: trigboard.set_prescale(0.1)
         if event.key()==QtCore.Qt.Key_2: trigboard.set_prescale(0.2)
-        if event.key()==QtCore.Qt.Key_C: scope.toggle_checkfastusbwriting()
+        if event.key()==QtCore.Qt.Key_C: scope.toggleCheckFastUSB()
 
     def actionRead_from_file(self):
         scope.readcalib()
@@ -291,7 +291,7 @@ class MainWindow(TemplateBaseClass):
         print("average",scope.average)
         
     def logic(self):
-        scope.togglelogicanalyzer()
+        scope.toggleLogicAnalyzer()
         if scope.dologicanalyzer:
             for li in np.arange(scope.num_logic_inputs):
                 c=(0,0,0)
@@ -379,13 +379,13 @@ class MainWindow(TemplateBaseClass):
         scal = scope.sampleSizePerChannel/256.
         point = value*scal + offset/pow(2,scope.downsample)
         if scope.downsample<0: point = 128*scal + (point-128*scal)*pow(2,scope.downsample)
-        scope.settriggerpoint(int(point))
+        scope.setTriggerPoint(int(point))
         self.vline = float(  2*(value-128)/256. *scope.xscale /scope.xscaling)
         self.otherlines[0].setData( [self.vline, self.vline], [scope.min_y, scope.max_y] ) # vertical line showing trigger time
     
     def rolling(self):
         scope.rolltrigger = not scope.rolltrigger
-        scope.tellrolltrig(scope.rolltrigger)
+        scope.setRolling(scope.rolltrigger)
         if trigboardport!="":
             trigboard.togglerolling()
         self.ui.rollingButton.setChecked(scope.rolltrigger)
@@ -744,7 +744,7 @@ class MainWindow(TemplateBaseClass):
             if scope.getone and not scope.timedout: self.dostartstop()
 
     def drawtext(self): # happens once per second
-        scope.tellrolltrig(scope.rolltrigger) #because sometimes the message had been lost
+        scope.setRolling(scope.rolltrigger) #because sometimes the message had been lost
         self.ui.textBrowser.setText(scope.chantext())
         self.ui.textBrowser.append("trigger threshold: " + str(round(self.hline,3)))
         if trigboardport!="" and trigboard.extclock:

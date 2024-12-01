@@ -75,98 +75,98 @@ class Haasoscope():
         self.serialdelaytimerwait=100 #150 # 600 # delay (in 2 us steps) between each 32 bytes of serial output (set to 600 for some slow USB serial setups, but 0 normally)
         if mearm: 
             self.serialdelaytimerwait+=600
-        self.baudrate = 1500000 #serial baud rate #1500000 #115200 #921600
-        self.serialTimeout = 0.25+self.sampleSizePerScope*8*11.0/self.baudrate #time to wait for serial response #3.0, 0.25+self.num_bytes*8*11.0/self.brate, or None
-        self.clkrate=125.0 # ADC sample rate in MHz
-        self.serialPort="" # the name of the serial port on your computer, connected to Haasoscope, like /dev/ttyUSB0 or COM8, leave blank to detect automatically!
-        self.trigserport=''
-        self.usbport=[] # the names of the USB2 ports on your computer, connected to Haasoscope, leave blank to detect automatically!
-        self.usbser=[]
-        self.usbsern=[]
-        self.texts = []
-        self.xdata=np.arange(self.sampleSizePerChannel)
-        self.xdata2=np.arange(self.sampleSizePerChannel*2) # for oversampling
-        self.xdata4=np.arange(self.sampleSizePerChannel*4) # for over-oversampling
-        self.ydata = []
-        ysampdatat=np.zeros(self.nsamp*len(max10adcchans)); self.ysampdata=np.reshape(ysampdatat,(len(max10adcchans),self.nsamp))
-        self.xsampdata=np.arange(self.nsamp)
-        self.paused=True
-        self.getone=False
-        self.rolltrigger=True #roll the trigger
-        self.average=False #will average every 2 samples
-        self.fallingedge=True #trigger on falling edge
-        self.dogrid=True #redraw the grid
-        self.chanforscreen=0 #channel to draw on the mini-display
-        self.triggertimethresh=1 #samples for which the trigger must be over/under threshold
-        self.downsample=2 #adc speed reduction, log 2... so 0 (none), 1(factor 2), 2(factor 4), etc.
-        self.dofft=False #drawing the FFT plot
-        self.dousb=False #whether to use USB2 output
-        self.dofastusb=False #whether to do sync 245 fifo mode on usb2 (need to reprogram ft232h hat) (experimental)
-        self.fastusbpadding=4 #number of bytes added total (start and end) to each channel in fastusb mode
-        self.fastusbendpadding=2 #number of bytes added to the end of each channel in fastusb mode
-        self.dousbparallel=False #whether to tell all board to read out over USB2 in parallel (experimental)
-        self.checkfastusbwriting=False #whether to cross-check the writing of fastusb data
-        self.sincresample=0 # amount of resampling to do (sinx/x)
-        self.dogetotherdata=False # whether to read other calculated data like TDC
-        self.tdcdata=0 # TDC data
-        self.selectedchannel=0 #what channel some actions apply to
-        self.selectedmax10channel=0 #what max10 channel is selected
-        self.autorearm=False #whether to automatically rearm the trigger after each event, or wait for a signal from software
-        self.dohighres=False #whether to do averaging during downsampling or not (turned on by default during startup, and off again during shutdown)
-        self.useexttrig=False #whether to use the external trigger input
-        self.autocalibchannel=-1 #which channel we are auto-calibrating
-        self.autocalibgainac=0 #which stage of gain and acdc we are auto-calibrating
-        self.recordedchannellength=25 #number of events to overlay in the 2d persist plot
-        self.ydatarefchan=-1 #the reference channel for each board, whose ydata will be subtracted from other channels' ydata on the board
-        self.chtext = "Ch." #the text in the legend for each channel
-        self.noselftrig=False
-        self.num_logic_inputs=5 #number of active logic analyzer bits on each board
-        self.flyingfast = False # to just read as fast as possible
-        self.threadingPerScopeEn=False #whether to have separate threads per board
-        self.dotriggercounter = 2 # how ofter to update trigger counter (in seconds) (set to 0 to turn off)
-        self.doswitchdata = True # whether to read the switch data
-        self.db = False #debugging #True #False
+        self.baudrate                 = 1500000 #serial baud rate #1500000 #115200 #921600
+        self.serialTimeout            = 0.25+self.sampleSizePerScope*8*11.0/self.baudrate #time to wait for serial response #3.0, 0.25+self.num_bytes*8*11.0/self.brate, or None
+        self.clkrate                  = 125.0 # ADC sample rate in MHz
+        self.serialPort               = "" # the name of the serial port on your computer, connected to Haasoscope, like /dev/ttyUSB0 or COM8, leave blank to detect automatically!
+        self.trigserport              = ''
+        self.usbport                  = [] # the names of the USB2 ports on your computer, connected to Haasoscope, leave blank to detect automatically!
+        self.usbser                   = []
+        self.usbsern                  = []
+        self.texts                    = []
+        self.xdata                    = np.arange(self.sampleSizePerChannel)
+        self.xdata2                   = np.arange(self.sampleSizePerChannel*2) # for oversampling
+        self.xdata4                   = np.arange(self.sampleSizePerChannel*4) # for over-oversampling
+        self.ydata                    = []
+        ysampdatat                    = np.zeros(self.nsamp*len(max10adcchans)); self.ysampdata=np.reshape(ysampdatat,(len(max10adcchans),self.nsamp))
+        self.xsampdata                = np.arange(self.nsamp)
+        self.paused                   = True
+        self.getone                   = False
+        self.rolltrigger              = True #roll the trigger
+        self.average                  = False #will average every 2 samples
+        self.fallingedge              = True #trigger on falling edge
+        self.dogrid                   = True #redraw the grid
+        self.chanforscreen            = 0 #channel to draw on the mini-display
+        self.triggertimethresh        = 1 #samples for which the trigger must be over/under threshold
+        self.downsample               = 2 #adc speed reduction, log 2... so 0 (none), 1(factor 2), 2(factor 4), etc.
+        self.dofft                    = False #drawing the FFT plot
+        self.dousb                    = False #whether to use USB2 output
+        self.dofastusb                = False #whether to do sync 245 fifo mode on usb2 (need to reprogram ft232h hat) (experimental)
+        self.fastusbpadding           = 4 #number of bytes added total (start and end) to each channel in fastusb mode
+        self.fastusbendpadding        = 2 #number of bytes added to the end of each channel in fastusb mode
+        self.dousbparallel            = False #whether to tell all board to read out over USB2 in parallel (experimental)
+        self.checkfastusbwriting      = False #whether to cross-check the writing of fastusb data
+        self.sincresample             = 0 # amount of resampling to do (sinx/x)
+        self.dogetotherdata           = False # whether to read other calculated data like TDC
+        self.tdcdata                  = 0 # TDC data
+        self.selectedchannel          = 0 #what channel some actions apply to
+        self.selectedmax10channel     = 0 #what max10 channel is selected
+        self.autorearm                = False #whether to automatically rearm the trigger after each event, or wait for a signal from software
+        self.dohighres                = False #whether to do averaging during downsampling or not (turned on by default during startup, and off again during shutdown)
+        self.useexttrig               = False #whether to use the external trigger input
+        self.autocalibchannel         = -1 #which channel we are auto-calibrating
+        self.autocalibgainac          = 0 #which stage of gain and acdc we are auto-calibrating
+        self.recordedchannellength    = 25 #number of events to overlay in the 2d persist plot
+        self.ydatarefchan             = -1 #the reference channel for each board, whose ydata will be subtracted from other channels' ydata on the board
+        self.chtext                   = "Ch." #the text in the legend for each channel
+        self.noselftrig               = False
+        self.num_logic_inputs         = 5 #number of active logic analyzer bits on each board
+        self.flyingfast               = False # to just read as fast as possible
+        self.threadingPerScopeEn      = False #whether to have separate threads per board
+        self.dotriggercounter         = 2 # how ofter to update trigger counter (in seconds) (set to 0 to turn off)
+        self.doswitchdata             = True # whether to read the switch data
+        self.db                       = False #debugging #True #False
     
-        self.dolockin=False # read lockin info
-        self.dolockinplot=True # plot the lockin info
-        self.lockinanalyzedataboard=0 # the board to analyze lockin info from
-        self.debuglockin=False #debugging of lockin calculations #True #False
-        self.reffreq = 0.008 #MHz of reference signal on chan 3 for lockin calculations
-        self.refsinchan = 3 #the channel number of the ref input signal (for auto reffreq calculation via sin fit)
+        self.dolockin                 = False # read lockin info
+        self.dolockinplot             = True # plot the lockin info
+        self.lockinanalyzedataboard   = 0 # the board to analyze lockin info from
+        self.debuglockin              = False #debugging of lockin calculations #True #False
+        self.reffreq                  = 0.008 #MHz of reference signal on chan 3 for lockin calculations
+        self.refsinchan               = 3 #the channel number of the ref input signal (for auto reffreq calculation via sin fit)
 
-        self.xscaling=1.e0 # for the x-axis scale
-        self.lowdaclevel=np.ones(scopeCount*ScopeChannelCount)*2050 # these hold the user set levels for each gain combination
-        self.highdaclevel=np.ones(scopeCount*ScopeChannelCount)*2800
-        self.lowdaclevelsuper=np.ones(scopeCount*ScopeChannelCount)*120
-        self.highdaclevelsuper=np.ones(scopeCount*ScopeChannelCount)*50
-        self.lowdaclevelac=np.ones(scopeCount*ScopeChannelCount)*2250 # these hold the user set levels for each gain combination in ac coupling mode
-        self.highdaclevelac=np.ones(scopeCount*ScopeChannelCount)*4600
-        self.lowdaclevelsuperac=np.ones(scopeCount*ScopeChannelCount)*2300
-        self.highdaclevelsuperac=np.ones(scopeCount*ScopeChannelCount)*4600
-        self.chanlevel=np.ones(scopeCount*ScopeChannelCount)*self.lowdaclevel # the current level for each channel, initially set to lowdaclevel (x1)
-        self.gain=np.ones(scopeCount*ScopeChannelCount, dtype=int) # 1 is low gain, 0 is high gain (x10)
-        self.supergain=np.ones(scopeCount*ScopeChannelCount, dtype=int) # 1 is normal gain, 0 is super gain (x100)
-        self.acdc=np.ones(scopeCount*ScopeChannelCount, dtype=int) # 1 is dc, 0 is ac
-        self.trigsactive=np.ones(scopeCount*ScopeChannelCount, dtype=int) # 1 is triggering on that channel, 0 is not triggering on it
-        self.dooversample=np.zeros(scopeCount*ScopeChannelCount, dtype=int) # 1 is oversampling, 0 is no oversampling, 9 is over-oversampling
-        self.rollingtrigger=True #rolling auto trigger at 5 Hz 
-        self.dologicanalyzer=False #whether to send logic analyzer data
-        self.fitline1=-1 # set to >-1 to draw a risetime fit
-        self.logicline1=-1 # to remember which is the first logic analyzer line
-        self.domeasure=True # whether to calculate measurements
-        self.dodrawing=True # assume we're drawing
-        self.Vrms=np.zeros(scopeCount*ScopeChannelCount, dtype=float) # the Vrms for each channel
-        self.Vmean=np.zeros(scopeCount*ScopeChannelCount, dtype=float) # the Vmean for each channel
+        self.xscaling                 = 1.e0 # for the x-axis scale
+        self.lowdaclevel              = np.ones(scopeCount*ScopeChannelCount)*2050 # these hold the user set levels for each gain combination
+        self.highdaclevel             = np.ones(scopeCount*ScopeChannelCount)*2800
+        self.lowdaclevelsuper         = np.ones(scopeCount*ScopeChannelCount)*120
+        self.highdaclevelsuper        = np.ones(scopeCount*ScopeChannelCount)*50
+        self.lowdaclevelac            = np.ones(scopeCount*ScopeChannelCount)*2250 # these hold the user set levels for each gain combination in ac coupling mode
+        self.highdaclevelac           = np.ones(scopeCount*ScopeChannelCount)*4600
+        self.lowdaclevelsuperac       = np.ones(scopeCount*ScopeChannelCount)*2300
+        self.highdaclevelsuperac      = np.ones(scopeCount*ScopeChannelCount)*4600
+        self.chanlevel                = np.ones(scopeCount*ScopeChannelCount)*self.lowdaclevel # the current level for each channel, initially set to lowdaclevel (x1)
+        self.gain                     = np.ones(scopeCount*ScopeChannelCount, dtype=int) # 1 is low gain, 0 is high gain (x10)
+        self.supergain                = np.ones(scopeCount*ScopeChannelCount, dtype=int) # 1 is normal gain, 0 is super gain (x100)
+        self.acdc                     = np.ones(scopeCount*ScopeChannelCount, dtype=int) # 1 is dc, 0 is ac
+        self.trigsactive              = np.ones(scopeCount*ScopeChannelCount, dtype=int) # 1 is triggering on that channel, 0 is not triggering on it
+        self.dooversample             = np.zeros(scopeCount*ScopeChannelCount, dtype=int) # 1 is oversampling, 0 is no oversampling, 9 is over-oversampling
+        self.rollingtrigger           = True #rolling auto trigger at 5 Hz
+        self.dologicanalyzer          = False #whether to send logic analyzer data
+        self.fitline1                 = -1 # set to >-1 to draw a risetime fit
+        self.logicline1               = -1 # to remember which is the first logic analyzer line
+        self.domeasure                = True # whether to calculate measurements
+        self.dodrawing                = True # assume we're drawing
+        self.Vrms                     = np.zeros(scopeCount*ScopeChannelCount, dtype=float) # the Vrms for each channel
+        self.Vmean                    = np.zeros(scopeCount*ScopeChannelCount, dtype=float) # the Vmean for each channel
         
         #These hold the state of the IO expanders
-        self.a20= int('f0',16) # oversamp (set bits 0,1 to 0 to send 0->2 and 1->3) / gain (set second char to 0 for low gain)
-        self.b20= int('0f',16)  # shdn (set first char to 0 to turn on) / ac coupling (set second char to f for DC, 0 for AC)
-        self.a21= int('00',16) # leds (on is 1)
-        self.b21= int('00',16)# free pins
+        self.a20                      = int('f0',16) # oversamp (set bits 0,1 to 0 to send 0->2 and 1->3) / gain (set second char to 0 for low gain)
+        self.b20                      = int('0f',16)  # shdn (set first char to 0 to turn on) / ac coupling (set second char to f for DC, 0 for AC)
+        self.a21                      = int('00',16) # leds (on is 1)
+        self.b21                      = int('00',16)# free pins
         
         print("Construction done")
     
-    def tellrolltrig(self, enable):
+    def setRolling(self, enable):
         #tell them to roll the trigger (a self-trigger each ~second), or not
         if enable:
             self.ser.write(bytearray([101]));
@@ -175,7 +175,7 @@ class Haasoscope():
             self.ser.write(bytearray([102])); 
             self.rollingtrigger=False; #print("not rolling trigger")
 
-    def tellsamplesmax10adc(self):
+    def setADCSampleSize(self):
         #tell it the number of samples to use for the 1MHz internal Max10 ADC
         self.ser.write(bytearray([120]))
         myb=bytearray.fromhex('{:04x}'.format(self.nsamp))
@@ -183,7 +183,7 @@ class Haasoscope():
         self.ser.write(bytearray([myb[1]]))
         if self.db: print("Nsamp for max10 ADC is",256*myb[0]+1*myb[1])
     
-    def settriggerpoint(self,tp):
+    def setTriggerPoint(self,tp):
         #tell it the trigger point
         self.ser.write(bytearray([121]))
         myb=bytearray.fromhex('{:04x}'.format(tp))
@@ -191,7 +191,7 @@ class Haasoscope():
         self.ser.write(bytearray([myb[1]]))
         #print "Trigger point is",256*myb[0]+1*myb[1]
 
-    def tellsamplessend(self):
+    def setSampleTransmitCount(self):
         #tell it the number of samples to send
         self.ser.write(bytearray([122]))
         myb=bytearray.fromhex('{:04x}'.format(int(self.sampleSizePerChannel*pow(2,sendincrement)))) # or 0 for all, or num_samples*pow(2,sendincrement)
@@ -199,15 +199,15 @@ class Haasoscope():
         self.ser.write(bytearray([myb[1]]))
         print("num samples is",256*myb[0]+1*myb[1])
     
-    def telllockinnumtoshift(self,numtoshift):
+    def setLockinShift(self,numtoshift):
         #tell it the number of samples to shift when calculating 90deg outofphase sum for lockin
         self.ser.write(bytearray([138]))
         myb=bytearray.fromhex('{:04x}'.format(numtoshift))
         self.ser.write(bytearray([myb[0]]))
         self.ser.write(bytearray([myb[1]]))
-        if self.db: print("lockinnumtoshift is",256*myb[0]+1*myb[1])
+        if self.db: print("LockinShift is",256*myb[0]+1*myb[1])
         
-    def tellserialdelaytimerwait(self):
+    def setSerialWaittime(self):
         #tell it the number of microseconds to wait between every 32 (64?) bytes of serial output (for some slow USB serial setups)
         self.ser.write(bytearray([135]))
         myb=bytearray.fromhex('{:04x}'.format(self.serialdelaytimerwait))
@@ -215,13 +215,13 @@ class Haasoscope():
         self.ser.write(bytearray([myb[1]]))
         print("serialdelaytimerwait is",256*myb[0]+1*myb[1])
     
-    def tellbytesskip(self):
+    def setByteSkipCount(self):
         #tell it the number of bytes to skip after each send, log2
         self.ser.write(bytearray([123]))
         self.ser.write(bytearray([sendincrement]))
         print("send increment is",sendincrement)
     
-    def togglelogicanalyzer(self):
+    def toggleLogicAnalyzer(self):
         #tell it start/stop doing logic analyzer
         self.dologicanalyzer = not self.dologicanalyzer
         self.ser.write(bytearray([145]))
@@ -241,17 +241,17 @@ class Haasoscope():
                     self.usbser[usb].read_data_set_chunksize( int((self.sampleSizePerScope + self.fastusbpadding*ScopeChannelCount) * 514/512 + 100) )
         print("dologicanalyzer is now",self.dologicanalyzer)
 
-    def toggle_fastusb(self):
+    def toggleFastUSB(self):
         self.ser.write(bytearray([58]))
         print("toggled fast usb writing")
 
-    def toggle_checkfastusbwriting(self):
+    def toggleCheckFastUSB(self):
         self.ser.write(bytearray([59]))
         self.checkfastusbwriting = not self.checkfastusbwriting
         print("toggled checkfastusbwriting to",self.checkfastusbwriting)
 
     minfirmwareversion=255
-    def getfirmwareversion(self, board):
+    def getBoardFwVersion(self, board):
         #get the firmware version of a board
         oldtime=time.time()
         if board<10:
@@ -284,7 +284,7 @@ class Haasoscope():
         else:
             if ds>8:
                 ds=8 # otherwise we timeout upon readout
-                if self.sampleSizePerChannel>10: self.settriggerpoint(self.sampleSizePerChannel-10) # set trigger way to the right, so we can capture full event - NOTE - screws up mini-screen!
+                if self.sampleSizePerChannel>10: self.setTriggerPoint(self.sampleSizePerChannel-10) # set trigger way to the right, so we can capture full event - NOTE - screws up mini-screen!
                 #self.otherlines[0].set_visible(False) # don't draw trigger time position line, to indicate it's not really set anymore
         self.ser.write(bytearray([125]))
         self.ser.write(bytearray([ds]))
@@ -581,30 +581,30 @@ class Haasoscope():
     def getIDs(self):
         debug3=True
         self.uniqueID=[]
-        for board in range(scopeCount):
+        for boardIdx in range(scopeCount):
             if self.minfirmwareversion>=17:
-                self.ser.write(bytearray([53, board]))  # make the next board active (serial_passthrough 0)
+                self.ser.write(bytearray([53, boardIdx]))  # make the next board active (serial_passthrough 0)
             else:
-                self.ser.write(bytearray([30 + board]))  # make the next board active (serial_passthrough 0)
+                self.ser.write(bytearray([30 + boardIdx]))  # make the next board active (serial_passthrough 0)
             self.ser.write(bytearray([142])) #request the unique ID
             num_other_bytes = 8
             rslt = self.ser.read(num_other_bytes)
             if len(rslt)==num_other_bytes:
                 byte_array = unpack('%dB'%len(rslt),rslt) #Convert serial data to array of numbers
                 self.uniqueID.append( ''.join(format(x, '02x') for x in byte_array) )
-                if debug3: print("got uniqueID",self.uniqueID[board],"for board",board,", len is now",len(self.uniqueID))
+                if debug3: print("got uniqueID",self.uniqueID[boardIdx],"for board",boardIdx,", len is now",len(self.uniqueID))
             else:
-                print("getID asked for",num_other_bytes,"bytes and got",len(rslt),"from board",board," - Exiting!")
+                print("getID asked for",num_other_bytes,"bytes and got",len(rslt),"from board",boardIdx," - Exiting!")
                 sys.exit(-4)
 
     trigratecounter = []
     def gettrigratecounter(self):
         self.trigratecounter=[]
-        for board in range(scopeCount):
+        for boardIdx in range(scopeCount):
             if self.minfirmwareversion>=17:
-                self.ser.write(bytearray([53, board]))  # make the next board active (serial_passthrough 0)
+                self.ser.write(bytearray([53, boardIdx]))  # make the next board active (serial_passthrough 0)
             else:
-                self.ser.write(bytearray([30 + board]))  # make the next board active (serial_passthrough 0)
+                self.ser.write(bytearray([30 + boardIdx]))  # make the next board active (serial_passthrough 0)
             self.ser.write(bytearray([151])) #request the trigratecounter from the board
             num_other_bytes = 4
             rslt = self.ser.read(num_other_bytes)
@@ -613,7 +613,7 @@ class Haasoscope():
                 self.trigratecounter.append( byte_array[0] + 256*byte_array[1] + 256*256*byte_array[2] + 256*256*256*byte_array[3] )
                 #print("got trigratecounter",self.trigratecounter[board],"for board",board,", len is now",len(self.trigratecounter))
             else:
-                print("gettrigratecounter asked for",num_other_bytes,"bytes and got",len(rslt),"from board",board)
+                print("gettrigratecounter asked for",num_other_bytes,"bytes and got",len(rslt),"from board",boardIdx)
 
     def togglesupergainchan(self,chan):
         if self.supergain[chan]==1:
@@ -702,9 +702,9 @@ class Haasoscope():
                 numtoshiftf= 1.0/self.reffreq/4.0 / uspersample
                 print("would like to shift by",round(numtoshiftf,4),"samples, and uspersample is",uspersample)
                 self.numtoshift = int(round(numtoshiftf,0))+0 # shift by 90 deg
-                self.telllockinnumtoshift(self.numtoshift)
+                self.setLockinShift(self.numtoshift)
             else:
-                self.telllockinnumtoshift(0) # tells the FPGA to not send lockin info    
+                self.setLockinShift(0) # tells the FPGA to not send lockin info    
             self.telltickstowait()
         self.setxaxis()
         return True # successful (parameter within OK range)
@@ -1354,11 +1354,11 @@ class Haasoscope():
                 else: self.usbser[usb].timeout=.25 # lower the timeout on the connections, temporarily
             foundusbs=[]
             self.ser.write(bytearray([100])) # prime the trigger (for all boards)
-            for bn in range(scopeCount):
+            for boardIdx in range(scopeCount):
                 if self.minfirmwareversion>=17:
-                    self.ser.write(bytearray([51,bn]))
+                    self.ser.write(bytearray([51,boardIdx]))
                 else:
-                    self.ser.write(bytearray([10+bn]))
+                    self.ser.write(bytearray([10+boardIdx]))
                 foundit=False
                 time.sleep(0.25) #wait for an event to happen, which should be 0.2s (5 Hz rolling trigger)
                 for usb in range(len(self.usbser)):
@@ -1375,17 +1375,17 @@ class Haasoscope():
                             print(type(e).__name__, "Error reading from USB2", usb)
                             return
                         if len(rslt)==self.sampleSizePerScope+padding*ScopeChannelCount:
-                            print(time.time() - self.oldtime,"   got the right nbytes for board",bn,"from usb",usb)
-                            self.usbsermap[bn]=usb
+                            print(time.time() - self.oldtime,"   got the right nbytes for board",boardIdx,"from usb",usb)
+                            self.usbsermap[boardIdx]=usb
                             foundusbs.append(usb) # remember that we already have figured out which board this usb connection is for, so we don't bother trying again for another board
                             foundit=True
                             if self.threadingPerScopeEn:
                                 self.usbser[usb].close()
                                 #print("sending usb number to process")
-                                self.parent_conn[bn].send(self.usbsern[usb])
+                                self.parent_conn[boardIdx].send(self.usbsern[usb])
                                 #print("waiting for response from process")
-                                msg = self.parent_conn[bn].recv()
-                                if msg != "OK": print("pro_", bn, "said", msg)
+                                msg = self.parent_conn[boardIdx].recv()
+                                if msg != "OK": print("pro_", boardIdx, "said", msg)
                             if self.checkfastusbwriting:
                                 rsltslow = self.ser.read(int(self.sampleSizePerScope))  # to cross-check the readout
                                 print("got", len(rsltslow), "bytes from slow serial readout")
@@ -1393,7 +1393,7 @@ class Haasoscope():
                         #else: print(time.time() - self.oldtime,"   got the wrong nbytes",len(rslt),"for board",bn,"from usb",usb)
                     #else: print("   already know what usb",usb,"is for")
                 if not foundit:
-                    print("could not find usb2 connection for board",bn)
+                    print("could not find usb2 connection for board",boardIdx)
                     return False
             if not self.threadingPerScopeEn:
                 for usb in range(len(self.usbser)):
@@ -1605,57 +1605,57 @@ class Haasoscope():
         self.timedout=False
         self.max10adcchan=1
         if self.threadingPerScopeEn:
-            for bn in range(scopeCount):
-                if self.db: print(time.time()-self.oldtime,"getting board",bn)
+            for boardIdx in range(scopeCount):
+                if self.db: print(time.time()-self.oldtime,"getting board",boardIdx)
                 try:
-                    self.parent_conn[bn].send([self.sampleSizePerChannel, self.fastusbpadding, self.fastusbendpadding, self.yscale, self.dologicanalyzer, self.rollingtrigger])
+                    self.parent_conn[boardIdx].send([self.sampleSizePerChannel, self.fastusbpadding, self.fastusbendpadding, self.yscale, self.dologicanalyzer, self.rollingtrigger])
                 except:
-                    print("could not send message to receiver",bn,"- Exiting!")
+                    print("could not send message to receiver",boardIdx,"- Exiting!")
                     sys.exit(-3)
-                xboardshift=(11.0*bn/8.0)/pow(2,max(self.downsample,0)) # shift the board data to the right by this number of samples (to account for the readout delay) #downsample isn't less than 0 for xscaling
+                xboardshift=(11.0*boardIdx/8.0)/pow(2,max(self.downsample,0)) # shift the board data to the right by this number of samples (to account for the readout delay) #downsample isn't less than 0 for xscaling
                 xdatanew = (self.xdata-xboardshift-self.sampleSizePerChannel/2.)*(1000.0*pow(2,max(self.downsample,0))/self.clkrate/self.xscaling) #downsample isn't less than 0 for xscaling
                 xdatanew = xdatanew[1:len(xdatanew)]
-                for l in range(ScopeChannelCount): self.xydata[bn*ScopeChannelCount+l][0]=xdatanew # for printing out or other analysis
-                if self.db: print(time.time()-self.oldtime,"done with board",bn)
-            for bn in range(scopeCount):
-                msg = self.parent_conn[bn].recv()
-                if msg != "OK": print("pro_", bn, "said", msg)
-                self.getmax10adc(bn)  # get data from 1 MHz Max10 ADC channels
-                if self.dogetotherdata: self.getotherdata(bn)  # get other data, like TDC info, or other bytes
-                if self.dofft: self.plot_fft(bn)  # do the FFT plot
+                for l in range(ScopeChannelCount): self.xydata[boardIdx*ScopeChannelCount+l][0]=xdatanew # for printing out or other analysis
+                if self.db: print(time.time()-self.oldtime,"done with board",boardIdx)
+            for boardIdx in range(scopeCount):
+                msg = self.parent_conn[boardIdx].recv()
+                if msg != "OK": print("pro_", boardIdx, "said", msg)
+                self.getmax10adc(boardIdx)  # get data from 1 MHz Max10 ADC channels
+                if self.dogetotherdata: self.getotherdata(boardIdx)  # get other data, like TDC info, or other bytes
+                if self.dofft: self.plot_fft(boardIdx)  # do the FFT plot
                 if self.dologicanalyzer:
                     xlogicshift=12.0/pow(2,max(self.downsample,0)) # shift the logic analyzer data to the right by this number of samples (to account for the ADC delay) #downsample isn't less than 0 for xscaling
                     xdatanew = (self.xdata+xlogicshift-self.sampleSizePerChannel/2.)*(1000.0*pow(2,max(self.downsample,0))/self.clkrate/self.xscaling) #downsample isn't less than 0 for xscaling
                     theboard = scopeCount - 1 - int(self.selectedchannel / ScopeChannelCount)
-                    if bn==theboard and self.dodrawing:
-                        b = np.unpackbits(self.xydatalogicraw)
+                    if boardIdx==theboard and self.dodrawing:
+                        boardIdx = np.unpackbits(self.xydatalogicraw)
                         for l in np.arange(self.num_logic_inputs):
-                            bl=b[7-l::8] # every 8th bit, starting at 7-l
+                            bl=boardIdx[7-l::8] # every 8th bit, starting at 7-l
                             ydatanew = bl*.3 + (l+1)*3.2/8. # scale it and shift it
                             self.xydatalogic[l][0]=xdatanew
                             self.xydatalogic[l][1]=ydatanew
         else: # not mt
-            for bn in np.arange(scopeCount):
-                if self.db: print(time.time()-self.oldtime,"getting board",bn)
-                self.getdata(bn) #this sets all boards before this board into serial passthrough mode, so this and following calls for data will go to this board and then travel back over serial
-                if self.db: print(time.time() - self.oldtime, "got data from board",bn)
+            for boardIdx in np.arange(scopeCount):
+                if self.db: print(time.time()-self.oldtime,"getting board",boardIdx)
+                self.getdata(boardIdx) #this sets all boards before this board into serial passthrough mode, so this and following calls for data will go to this board and then travel back over serial
+                if self.db: print(time.time() - self.oldtime, "got data from board",boardIdx)
                 if self.flyingfast: continue # to test flying fast
-                self.getmax10adc(bn) # get data from 1 MHz Max10 ADC channels
-                if self.dogetotherdata: self.getotherdata(bn) # get other data, like TDC info, or other bytes
-                if self.dofft: self.plot_fft(bn) #do the FFT plot
+                self.getmax10adc(boardIdx) # get data from 1 MHz Max10 ADC channels
+                if self.dogetotherdata: self.getotherdata(boardIdx) # get other data, like TDC info, or other bytes
+                if self.dofft: self.plot_fft(boardIdx) #do the FFT plot
                 if self.dolockin and self.debuglockin:
-                    if sendincrement==0: self.lockinanalyzedata(bn)
+                    if sendincrement==0: self.lockinanalyzedata(boardIdx)
                     else: print("you need to set sendincrement = 0 first before debugging lockin info"); return False
                 if self.dolockin and self.dolockinplot: self.plot_lockin()
-                self.on_running(self.ydata, bn) #update data in main window
-                if self.db: print(time.time()-self.oldtime,"done with board",bn)
+                self.on_running(self.ydata, boardIdx) #update data in main window
+                if self.db: print(time.time()-self.oldtime,"done with board",boardIdx)
         status=1
         if self.minfirmwareversion>=15 and self.dodrawing and self.rollingtrigger and self.doswitchdata: #v9.0 and up
             thetime2=time.time()
             elapsedtime=thetime2-self.oldtime2
             if elapsedtime>1.0:
                 if not self.havereadswitchdata: self.switchpos = [0] * scopeCount
-                for b in range(scopeCount): self.getswitchdata(b) #gets the dpdt switch positions
+                for boardIdx in range(scopeCount): self.getswitchdata(boardIdx) #gets the dpdt switch positions
                 self.havereadswitchdata=True
                 self.oldtime2=thetime2
                 status=2
@@ -1700,8 +1700,8 @@ class Haasoscope():
             else:
                 self.ser.write(bytearray([0]))  # tell them their IDs... first one gets 0, next gets 1, ...
                 self.ser.write(bytearray([20 + (scopeCount - 1)]))  # tell them which is the last board
-            for b in range(scopeCount):
-                firmwareversion = self.getfirmwareversion(b)
+            for boardIdx in range(scopeCount):
+                firmwareversion = self.getBoardFwVersion(boardIdx)
                 if firmwareversion<self.minfirmwareversion: self.minfirmwareversion=firmwareversion
             print("minimum firmwareversion of all boards is",self.minfirmwareversion)
             self.maxdownsample=15 # slowest I can run
@@ -1712,16 +1712,16 @@ class Haasoscope():
                 self.yscale*=1.1 # if we used 10M / 1.1M / 11k input resistors
             self.min_y = -self.yscale/2. #-4.0 #0 ADC
             self.max_y = self.yscale/2. #4.0 #256 ADC
-            self.tellrolltrig(self.rolltrigger)
+            self.setRolling(self.rolltrigger)
             #self.donoselftrig()
             #self.toggle_checkfastusbwriting()
-            self.tellsamplesmax10adc()
-            self.tellsamplessend()
-            self.tellbytesskip()
+            self.setADCSampleSize()
+            self.setSampleTransmitCount()
+            self.setByteSkipCount()
             self.telldownsample(self.downsample)
             self.togglehighres()
             self.settriggertime(self.triggertimethresh)
-            self.tellserialdelaytimerwait()
+            self.setSerialWaittime()
             self.tellSPIsetup(0) #0.9V CM but not connected
             self.tellSPIsetup(11) #offset binary output
             self.tellSPIsetup(22) #20:50 #22:150 #24:300 Ohm termination ChA
@@ -1729,7 +1729,7 @@ class Haasoscope():
             #self.tellSPIsetup(30) # multiplexed output
             self.tellSPIsetup(32) # non-multiplexed output (less noise)
             self.setupi2c() # sets all ports to be outputs
-            if self.dofastusb: self.toggle_fastusb()
+            if self.dofastusb: self.toggleFastUSB()
             self.toggledousb() # switch to USB2 connection for readout of events, if available
             self.xydata=np.empty([int(ScopeChannelCount*scopeCount),2,int(self.sampleSizePerChannel-1)],dtype=float)
             self.xydataslow=np.empty([len(max10adcchans),2,int(self.nsamp)],dtype=float)
@@ -1742,14 +1742,14 @@ class Haasoscope():
                 self.xydatalogicraw = np.frombuffer(self.xydatalogicraw_array, dtype=np.uint8).reshape(self.xydatalogicraw.shape)
                 self.parent_conn=[]
                 multiprocessing.set_start_method('spawn')
-                for bn in range(scopeCount):
+                for boardIdx in range(scopeCount):
                     parent_conn, child_conn = multiprocessing.Pipe()
                     self.parent_conn.append(parent_conn)
-                    pro = multiprocessing.Process(target=receiver, args=(bn, child_conn,
+                    pro = multiprocessing.Process(target=receiver, args=(boardIdx, child_conn,
                                                                          self.fastusbpadding,self.sampleSizePerChannel,
                                                                          self.xydata.shape,self.xydata_array,
                                                                          self.xydatalogicraw.shape,self.xydatalogicraw_array))
-                    print("   starting process",bn)
+                    print("   starting process",boardIdx)
                     pro.start()
             if self.dousb:
                 if not self.makeusbsermap(): return False # figure out which usb connection has which board's data
@@ -1770,9 +1770,9 @@ class Haasoscope():
             if self.autorearm: self.toggleautorearm()
             if self.dohighres: self.togglehighres()
             if self.useexttrig: self.toggleuseexttrig()
-            if self.dologicanalyzer: self.togglelogicanalyzer()
-            if self.dofastusb: self.toggle_fastusb()
-            if self.checkfastusbwriting: self.toggle_checkfastusbwriting()
+            if self.dologicanalyzer: self.toggleLogicAnalyzer()
+            if self.dofastusb: self.toggleFastUSB()
+            if self.checkfastusbwriting: self.toggleCheckFastUSB()
             if self.serialPort!="" and hasattr(self,'ser'):
                 self.shutdownadcs()
                 if not self.threadingPerScopeEn:
@@ -1781,7 +1781,7 @@ class Haasoscope():
         except SerialException:
             print("failed to talk to board when cleaning up!")
         if self.threadingPerScopeEn:
-            for bn in range(scopeCount): self.parent_conn[bn].send("END")
+            for boardIdx in range(scopeCount): self.parent_conn[boardIdx].send("END")
         print("bye bye!")
     
     #For setting up serial and USB connections
