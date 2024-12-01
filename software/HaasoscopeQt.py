@@ -108,8 +108,8 @@ class MainWindow(TemplateBaseClass):
         if scope.havereadswitchdata:
             self.ui.supergainCheck.setEnabled(False)
         
-        chanonboard = scope.selectedchannel%HaasoscopeLibQt.num_chan_per_board
-        theboard = HaasoscopeLibQt.scopeCount-1-int(scope.selectedchannel/HaasoscopeLibQt.num_chan_per_board)
+        chanonboard = scope.selectedchannel%HaasoscopeLibQt.ScopeChannelCount
+        theboard = HaasoscopeLibQt.scopeCount-1-int(scope.selectedchannel/HaasoscopeLibQt.ScopeChannelCount)
         if trigboardport!="" and trigboardport!="auto" and trigboard.extclock:
             if trigboard.histostosend != theboard: trigboard.set_histostosend(theboard)
 
@@ -128,12 +128,12 @@ class MainWindow(TemplateBaseClass):
         
         if scope.dooversample[scope.selectedchannel]>0:   self.ui.oversampCheck.setCheckState(QtCore.Qt.Checked)
         else:   self.ui.oversampCheck.setCheckState(QtCore.Qt.Unchecked)
-        if scope.selectedchannel%HaasoscopeLibQt.num_chan_per_board>1:   self.ui.oversampCheck.setEnabled(False)
+        if scope.selectedchannel%HaasoscopeLibQt.ScopeChannelCount>1:   self.ui.oversampCheck.setEnabled(False)
         else:  self.ui.oversampCheck.setEnabled(True)
         
         if scope.dooversample[scope.selectedchannel]>=9:   self.ui.overoversampCheck.setCheckState(QtCore.Qt.Checked)
         else:   self.ui.overoversampCheck.setCheckState(QtCore.Qt.Unchecked)
-        if scope.selectedchannel%HaasoscopeLibQt.num_chan_per_board>0:  self.ui.overoversampCheck.setEnabled(False)
+        if scope.selectedchannel%HaasoscopeLibQt.ScopeChannelCount>0:  self.ui.overoversampCheck.setEnabled(False)
         else:   self.ui.overoversampCheck.setEnabled(True)
     
     def oversamp(self):
@@ -172,7 +172,7 @@ class MainWindow(TemplateBaseClass):
             if scope.trigsactive[scope.selectedchannel]: scope.toggletriggerchan(scope.selectedchannel)
     
     def slowchanon(self):
-        maxchan=self.ui.slowchanBox.value()+HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.scopeCount
+        maxchan=self.ui.slowchanBox.value()+HaasoscopeLibQt.ScopeChannelCount*HaasoscopeLibQt.scopeCount
         if self.ui.slowchanonCheck.checkState() == QtCore.Qt.Checked:
             self.lines[maxchan].setVisible(True)
         else:
@@ -243,7 +243,7 @@ class MainWindow(TemplateBaseClass):
         modifiers = QtWidgets.QApplication.keyboardModifiers()
         if event.key()==QtCore.Qt.Key_I:
             if not modifiers == QtCore.Qt.ShiftModifier:
-                theboard = HaasoscopeLibQt.scopeCount - 1 - int(scope.selectedchannel / HaasoscopeLibQt.num_chan_per_board)
+                theboard = HaasoscopeLibQt.scopeCount - 1 - int(scope.selectedchannel / HaasoscopeLibQt.ScopeChannelCount)
                 scope.increment_clk_phase(theboard)
             else:
                 if trigboardport!="": trigboard.increment_trig_board_clock_phase()
@@ -332,8 +332,8 @@ class MainWindow(TemplateBaseClass):
                 
     def resamp(self):
         scope.sincresample = self.ui.resampBox.value()
-        if scope.sincresample>0: scope.xydata=np.empty([HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.scopeCount,2,scope.sincresample*(scope.sampleSizePerChannel-1)],dtype=float)
-        else: scope.xydata=np.empty([HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.scopeCount,2,1*(scope.sampleSizePerChannel-1)],dtype=float)
+        if scope.sincresample>0: scope.xydata=np.empty([HaasoscopeLibQt.ScopeChannelCount*HaasoscopeLibQt.scopeCount,2,scope.sincresample*(scope.sampleSizePerChannel-1)],dtype=float)
+        else: scope.xydata=np.empty([HaasoscopeLibQt.ScopeChannelCount*HaasoscopeLibQt.scopeCount,2,1*(scope.sampleSizePerChannel-1)],dtype=float)
         self.prepareforsamplechange()
     
     def dostartstop(self):        
@@ -482,7 +482,7 @@ class MainWindow(TemplateBaseClass):
     def fastadclineclick(self, curve):
         for li in range(self.nlines):
             if curve is self.lines[li].curve:
-                maxchan=li-HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.scopeCount
+                maxchan=li-HaasoscopeLibQt.ScopeChannelCount*HaasoscopeLibQt.scopeCount
                 if maxchan>=0: # these are the slow ADC channels
                     self.ui.slowchanBox.setValue(maxchan)
                     #print "selected slow curve", maxchan
@@ -510,10 +510,10 @@ class MainWindow(TemplateBaseClass):
     
     linepens=[]
     def launch(self):        
-        self.nlines = HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.scopeCount+len(HaasoscopeLibQt.max10adcchans)
+        self.nlines = HaasoscopeLibQt.ScopeChannelCount*HaasoscopeLibQt.scopeCount+len(HaasoscopeLibQt.max10adcchans)
         if self.db: print("nlines=",self.nlines)
         for li in np.arange(self.nlines):
-            maxchan=li-HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.scopeCount
+            maxchan=li-HaasoscopeLibQt.ScopeChannelCount*HaasoscopeLibQt.scopeCount
             c=(0,0,0)
             if maxchan>=0: # these are the slow ADC channels
                 if HaasoscopeLibQt.scopeCount>1:
@@ -546,7 +546,7 @@ class MainWindow(TemplateBaseClass):
             line.curve.sigClicked.connect(self.fastadclineclick)
             self.lines.append(line)
             self.linepens.append(pen)
-        self.ui.chanBox.setMaximum(HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.scopeCount-1)
+        self.ui.chanBox.setMaximum(HaasoscopeLibQt.ScopeChannelCount*HaasoscopeLibQt.scopeCount-1)
         self.ui.slowchanBox.setMinimum(0)
         self.ui.slowchanBox.setMaximum(max(len(HaasoscopeLibQt.max10adcchans)-1,0))
         #for the logic analyzer
@@ -601,7 +601,7 @@ class MainWindow(TemplateBaseClass):
         if self.savetofile: self.dosavetofile()
         if not self.ui.drawingCheck.checkState() == QtCore.Qt.Checked: return
         for li in range(self.nlines):
-            maxchan=li-HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.scopeCount
+            maxchan=li-HaasoscopeLibQt.ScopeChannelCount*HaasoscopeLibQt.scopeCount
             if maxchan>=0: # these are the slow ADC channels
                 self.lines[li].setData(scope.xydataslow[maxchan][0],scope.xydataslow[maxchan][1])
             else:
@@ -687,7 +687,7 @@ class MainWindow(TemplateBaseClass):
             if scope.dologicanalyzer: h5ds = self.outf.create_dataset(str(self.nevents)+"_logic", data=scope.xydatalogicraw, dtype='uint8', compression="lzf")
             # see h5py_analyze_example.py for how to read in python
         else:
-            for c in range(HaasoscopeLibQt.num_chan_per_board*HaasoscopeLibQt.scopeCount):
+            for c in range(HaasoscopeLibQt.ScopeChannelCount*HaasoscopeLibQt.scopeCount):
                 if self.lines[c].isVisible(): # only save the data for visible channels
                     self.outf.write(str(self.nevents)+",") # start of each line is the event number
                     self.outf.write(time_s+",") # next column is the time in seconds of the current event
@@ -726,8 +726,8 @@ class MainWindow(TemplateBaseClass):
                 elapsedtime=now-self.oldtime
                 self.oldtime=now
                 lastrate = round(self.tinterval/elapsedtime,2)
-                if scope.dologicanalyzer: nchan = HaasoscopeLibQt.num_chan_per_board + 1
-                else: nchan = HaasoscopeLibQt.num_chan_per_board
+                if scope.dologicanalyzer: nchan = HaasoscopeLibQt.ScopeChannelCount + 1
+                else: nchan = HaasoscopeLibQt.ScopeChannelCount
                 print(self.nevents,"events,",lastrate,"Hz",round(lastrate*HaasoscopeLibQt.scopeCount*scope.sampleSizePerChannel*nchan/1e6,3),"MB/s")
                 if lastrate>40: self.tinterval=500.
                 else: self.tinterval=100.
